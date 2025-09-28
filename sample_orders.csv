@@ -1,0 +1,4 @@
+customer_name,customer_email,phone,address,products
+John Doe,john@example.com,555-0001,123 Main St,"[{""sku"":""PROD001"",""quantity"":2},{""sku"":""PROD002"",""quantity"":1}]"
+Jane Smith,jane@example.com,555-0002,456 Oak Ave,"[{""sku"":""PROD001"",""quantity"":1},{""sku"":""PROD003"",""quantity"":3}]"
+Bob Johnson,bob@example.com,555-0003,789 Pine Rd,"[{""sku"":""PROD002"",""quantity"":2}]"

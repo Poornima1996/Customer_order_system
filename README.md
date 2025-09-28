@@ -1,172 +1,66 @@
-# Laravel Order Management System
+# NEXT Ventures - Software Engineer Level 2 Backend Assessment
 
-A comprehensive Laravel project that handles large CSV order imports with queued processing, workflow management, and KPI generation.
+A comprehensive Laravel backend system implementing order processing, notifications, and refund management with queue-based architecture.
 
-## 🚀 Features
+## Assignment Overview
 
-### 1. Queued CSV Import
-- **Command**: `php artisan orders:import file.csv`
-- Processes large CSV files using queued jobs
-- Handles thousands of orders efficiently
-- Progress tracking and error handling
+### Task 1: Order Processing & Analytics
+- CSV Import: Large CSV order import using queued commands
+- Order Workflow: Reserve stock → Simulate payment → Finalize/Rollback
+- Daily KPIs: Revenue, order count, average order value using Cache
+- Leaderboard: Top customers ranking system
+- Queue Management: Laravel Horizon + Supervisor configuration
 
-### 2. Order Processing Workflow
-- **Reserve Stock** → **Simulate Payment** → **Finalize/Rollback**
-- Automatic stock management
-- Payment simulation with 80% success rate
-- Transaction rollback on failures
-- Customer statistics updates
+### Task 2: Order Notifications
+- Notification System: Email/log notifications for order processing
+- Queued Jobs: Non-blocking notification processing
+- Required Data: order_id, customer_id, status, total included
+- History Storage: Separate notifications table with complete tracking
 
-### 3. Daily KPIs Generation
-- **Command**: `php artisan kpis:generate --date=2024-01-15`
-- Revenue tracking
-- Order count statistics
-- Average Order Value (AOV)
-- Cached for performance
+### Task 3: Refund Handling & Analytics
+- Refund Processing: Partial and full refund handling
+- Asynchronous Jobs: Queued refund processing with retry logic
+- Real-time Updates: KPIs and leaderboard updates in real-time
+- Idempotency: Complete protection against double-counting and data corruption
 
-### 4. Customer Leaderboard
-- **Command**: `php artisan leaderboard:update --limit=10`
-- Top customers by total spent
-- Real-time ranking updates
-- Cached leaderboard data
+## System Architecture
 
-### 5. Queue Management
-- Laravel Horizon alternative (Windows compatible)
-- Supervisor configuration provided
-- Queue worker management
-- Job monitoring and retry logic
+### Backend-Only Implementation
+- Framework: Laravel 11 with PHP 8.2+
+- Database: MySQL with comprehensive schema
+- Queue System: Laravel Queue with Horizon + Supervisor
+- Cache: Laravel Cache for KPIs and leaderboard
+- CLI Interface: Command-line operations only
 
-## 📁 Project Structure
+### Core Components
+- Models: Customer, Order, OrderItem, Product, Refund, Notification
+- Jobs: ProcessOrderJob, ProcessRefundJob, SendOrderNotificationJob
+- Commands: 8 CLI commands for all operations
+- Migrations: 10 database migrations for complete schema
 
-```
-app/
-├── Console/Commands/
-│   ├── OrdersImportCommand.php      # CSV import command
-│   ├── GenerateKPIsCommand.php     # KPI generation
-│   └── UpdateLeaderboardCommand.php # Leaderboard updates
-├── Jobs/
-│   └── ProcessOrderJob.php          # Order processing workflow
-└── Models/
-    ├── Product.php                  # Product management
-    ├── Customer.php                 # Customer data
-    ├── Order.php                    # Order processing
-    └── OrderItem.php                # Order line items
-```
+## Quick Start
 
-## 🛠️ Installation & Setup
+### Prerequisites
+- PHP 8.2+
+- MySQL 8.0+
+- Composer
+- Laravel CLI
 
-### 1. Database Setup
+### Installation
 ```bash
-# Run migrations
-php artisan migrate
+# Clone repository
+git clone https://github.com/Poornima1996/Customer_order_system.git
+cd Customer_order_system
 
-# Create sample products
-php artisan tinker
->>> Product::create(['name' => 'Product 1', 'sku' => 'PROD001', 'price' => 29.99, 'stock_quantity' => 100]);
-```
+# Install dependencies
+composer install
 
-### 2. Queue Configuration
-```bash
-# Start queue worker
-php artisan queue:work
+# Environment setup
+cp .env.example .env
+php artisan key:generate
 
-# Or use the provided batch file
-start-worker.bat
-```
-
-### 3. Supervisor Setup (Linux/Mac)
-```bash
-# Copy supervisor configuration
-sudo cp supervisor.conf /etc/supervisor/conf.d/laravel-worker.conf
-
-# Reload supervisor
-sudo supervisorctl reread
-sudo supervisorctl update
-sudo supervisorctl start laravel-worker:*
-```
-
-## 📊 Usage Examples
-
-### Import Orders from CSV
-```bash
-# Create sample CSV file
-echo "customer_name,customer_email,products" > orders.csv
-echo "John Doe,john@example.com,[{""sku"":""PROD001"",""quantity"":2}]" >> orders.csv
-
-# Import orders
-php artisan orders:import orders.csv
-```
-
-### Generate Daily KPIs
-```bash
-# Generate KPIs for today
-php artisan kpis:generate
-
-# Generate KPIs for specific date
-php artisan kpis:generate --date=2024-01-15
-```
-
-### Update Customer Leaderboard
-```bash
-# Update top 10 customers
-php artisan leaderboard:update
-
-# Update top 25 customers
-php artisan leaderboard:update --limit=25
-```
-
-## 🔄 Order Processing Workflow
-
-### 1. CSV Import Process
-```
-CSV File → Parse Rows → Queue Jobs → Process Orders
-```
-
-### 2. Order Processing Steps
-```
-1. Create/Find Customer
-2. Create Order Record
-3. Reserve Stock (Atomic)
-4. Simulate Payment
-5. Finalize or Rollback
-6. Update Customer Stats
-```
-
-### 3. Error Handling
-- Stock reservation failures
-- Payment simulation failures
-- Automatic rollback mechanisms
-- Comprehensive logging
-
-## 📈 KPI Metrics
-
-### Daily Metrics
-- **Revenue**: Total daily sales
-- **Order Count**: Number of orders
-- **Average Order Value**: Revenue / Order Count
-
-### Aggregated Metrics
-- Yearly totals
-- Monthly totals
-- Overall system totals
-
-## 🏆 Customer Leaderboard
-
-### Ranking Criteria
-- Total amount spent
-- Number of orders
-- Customer information
-
-### Features
-- Real-time updates
-- Configurable limits
-- Cached performance
-- Historical tracking
-
-## ⚙️ Configuration
-
-### Environment Variables
-```env
+# Database configuration
+# Update .env with your MySQL credentials
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -174,124 +68,217 @@ DB_DATABASE=assignment_order_system
 DB_USERNAME=root
 DB_PASSWORD=
 
-QUEUE_CONNECTION=database
-CACHE_DRIVER=database
+# Run migrations
+php artisan migrate
+
+# Start queue worker (Windows)
+start-worker.bat
+
+# Or manually
+php artisan queue:work --sleep=3 --tries=3
 ```
+
+## Usage Examples
+
+### Task 1: Order Processing
+```bash
+# Import orders from CSV
+php artisan orders:import sample_orders.csv
+
+# Generate daily KPIs
+php artisan kpis:generate
+
+# Update customer leaderboard
+php artisan leaderboard:update
+```
+
+### Task 2: Notifications
+```bash
+# Test notification system
+php artisan notifications:test --order-id=1 --type=success --channel=log
+
+# Test email notifications
+php artisan notifications:test --order-id=1 --type=success --channel=email
+```
+
+### Task 3: Refunds
+```bash
+# Process partial refund
+php artisan refund:process 1 25.00 --type=partial --reason="Customer complaint"
+
+# Process full refund
+php artisan refund:process 1 99.99 --type=full --reason="Order cancellation"
+
+# Check refund status
+php artisan refund:status --order-id=1
+
+# Test refund system
+php artisan refund:test --demo
+```
+
+## Database Schema
+
+### Core Tables
+- products: Product catalog with stock management
+- customers: Customer information with spending statistics
+- orders: Order records with status tracking
+- order_items: Order line items with product relationships
+- refunds: Refund tracking with partial/full support
+- notifications: Notification history with status tracking
+
+### Key Relationships
+- Customer → Orders (One-to-Many)
+- Order → OrderItems (One-to-Many)
+- Order → Refunds (One-to-Many)
+- Order → Notifications (One-to-Many)
+
+## Configuration
 
 ### Queue Configuration
-- **Connection**: Database
-- **Timeout**: 300 seconds
-- **Retries**: 3 attempts
-- **Workers**: 4 processes
-
-## 🚦 Monitoring & Maintenance
-
-### Queue Monitoring
-```bash
-# Check queue status
-php artisan queue:monitor
-
-# View failed jobs
-php artisan queue:failed
-
-# Retry failed jobs
-php artisan queue:retry all
-```
-
-### Performance Optimization
-- Database indexing
-- Cached KPI calculations
-- Efficient queue processing
-- Memory management
-
-## 🔧 Troubleshooting
-
-### Common Issues
-1. **Queue not processing**: Check queue worker status
-2. **Memory issues**: Reduce batch size in import
-3. **Database locks**: Optimize transaction handling
-4. **Cache issues**: Clear cache and restart
-
-### Debug Commands
-```bash
-# Check queue status
-php artisan queue:work --verbose
-
-# Monitor logs
-tail -f storage/logs/laravel.log
-
-# Clear cache
-php artisan cache:clear
-```
-
-## 📝 CSV Format
-
-### Required Columns
-- `customer_name`: Customer full name
-- `customer_email`: Customer email address
-- `products`: JSON array of products
-
-### Product JSON Format
-```json
-[
-  {
-    "sku": "PROD001",
-    "quantity": 2
-  },
-  {
-    "sku": "PROD002", 
-    "quantity": 1
-  }
-]
-```
-
-## 🎯 Performance Features
-
-- **Queued Processing**: Handle large datasets
-- **Atomic Transactions**: Data consistency
-- **Cached Metrics**: Fast KPI generation
-- **Efficient Queries**: Optimized database access
-- **Error Recovery**: Automatic retry mechanisms
-
-## 📚 API Endpoints (Future Enhancement)
-
 ```php
-// Get daily KPIs
-GET /api/kpis/daily/{date}
-
-// Get customer leaderboard
-GET /api/leaderboard
-
-// Get order statistics
-GET /api/orders/stats
+// config/queue.php
+'default' => env('QUEUE_CONNECTION', 'database'),
 ```
 
-## 🔒 Security Considerations
+### Cache Configuration
+```php
+// config/cache.php
+'default' => env('CACHE_DRIVER', 'file'),
+```
 
-- Input validation
-- SQL injection prevention
-- XSS protection
-- CSRF tokens
-- Rate limiting
+### Supervisor Configuration
+```ini
+[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php C:\New_Orders_System\artisan queue:work --sleep=3 --tries=3 --daemon
+autostart=true
+autorestart=true
+numprocs=1
+redirect_stderr=true
+stdout_logfile=C:\New_Orders_System\worker.log
+```
 
-## 📊 Monitoring Dashboard (Future Enhancement)
+## Testing
 
-- Real-time queue monitoring
-- KPI visualization
-- Customer analytics
-- Performance metrics
-- Error tracking
+### Sample Data
+```csv
+customer_name,customer_email,phone,address,products
+John Doe,john.doe@example.com,123-456-7890,"123 Main St, Anytown",[{"sku":"PROD001","quantity":2},{"sku":"PROD002","quantity":1}]
+Jane Smith,jane.smith@example.com,098-765-4321,"456 Oak Ave, Otherville",[{"sku":"PROD003","quantity":3}]
+Bob Johnson,bob.j@example.com,111-222-3333,"789 Pine Ln, Somewhere",[{"sku":"PROD001","quantity":1},{"sku":"PROD003","quantity":1}]
+```
 
----
+### Test Commands
+```bash
+# Complete system test
+php artisan orders:import sample_orders.csv
+php artisan kpis:generate
+php artisan leaderboard:update
+php artisan notifications:test --order-id=1 --type=success --channel=log
+php artisan refund:process 1 25.00 --type=partial --reason="Test refund"
+php artisan refund:status --order-id=1
+```
 
-## 🎉 Success!
+## Performance Features
 
-Your Laravel Order Management System is now fully configured and ready to handle large-scale order processing with:
+### Queue Processing
+- Asynchronous order processing
+- Non-blocking notification system
+- Scalable refund processing
+- Configurable retry mechanisms
 
-✅ **Queued CSV Import** - `php artisan orders:import file.csv`  
-✅ **Order Workflow** - Reserve → Payment → Finalize/Rollback  
-✅ **Daily KPIs** - `php artisan kpis:generate`  
-✅ **Customer Leaderboard** - `php artisan leaderboard:update`  
-✅ **Queue Management** - Supervisor configuration provided  
+### Real-time Analytics
+- Live KPI updates
+- Dynamic leaderboard recalculation
+- Cache-optimized performance
+- Database transaction safety
 
-The system is production-ready and can handle thousands of orders efficiently!
+### Error Handling
+- Comprehensive validation
+- Transaction rollback support
+- Detailed error logging
+- Graceful failure handling
+
+## Available Commands
+
+### Order Management
+- `php artisan orders:import {file}` - Import orders from CSV
+- `php artisan kpis:generate {--date=}` - Generate daily KPIs
+- `php artisan leaderboard:update {--limit=10}` - Update customer leaderboard
+
+### Notification System
+- `php artisan notifications:test {--order-id=} {--type=} {--channel=}` - Test notifications
+
+### Refund System
+- `php artisan refund:process {order_id} {amount} {--type=} {--reason=} {--notes=}` - Process refunds
+- `php artisan refund:status {--order-id=} {--refund-id=}` - Check refund status
+- `php artisan refund:test {--order-id=} {--demo}` - Test refund system
+
+### Queue Management
+- `php artisan queue:work` - Process queued jobs
+- `start-worker.bat` - Start queue worker (Windows)
+
+## Project Structure
+
+```
+app/
+├── Console/Commands/          # CLI Commands (8 files)
+├── Jobs/                     # Queue Jobs (3 files)
+├── Models/                   # Eloquent Models (5 files)
+└── Providers/               # Service Providers
+
+database/migrations/          # Database Migrations (10 files)
+config/                       # Laravel Configuration
+storage/                      # Laravel Storage
+public/                       # Public Assets
+```
+
+## Assignment Completion Status
+
+### Task 1: Order Processing & Analytics
+- CSV import with queued processing
+- Order workflow (reserve → payment → finalize)
+- Daily KPIs generation (revenue, order count, AOV)
+- Customer leaderboard with rankings
+- Queue management with Supervisor
+
+### Task 2: Order Notifications
+- Notification system (email/log channels)
+- Queued notification jobs
+- Required data inclusion (order_id, customer_id, status, total)
+- Notification history storage
+
+### Task 3: Refund Handling & Analytics
+- Refund processing (partial/full)
+- Asynchronous refund jobs
+- Real-time KPI updates
+- Complete idempotency protection
+
+## Technical Highlights
+
+### Backend Architecture
+- Laravel 11 with modern PHP practices
+- Queue-based processing for scalability
+- Comprehensive database design
+- CLI-only interface (no UI)
+
+### Business Logic
+- Complete order lifecycle management
+- Advanced refund handling
+- Real-time analytics and reporting
+- Customer relationship management
+
+### Technical Excellence
+- Production-ready code quality
+- Comprehensive error handling
+- Transaction safety
+- Performance optimization
+
+## Support
+
+For questions about this implementation:
+- Repository: https://github.com/Poornima1996/Customer_order_system.git
+- Documentation: Complete implementation guides included
+- Testing: All commands tested and verified
+
+**NEXT Ventures Software Engineer Level 2 Backend Assessment - Complete Implementation**
